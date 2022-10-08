@@ -65,6 +65,21 @@ uint8_t aBmsRequest[6] = {0x5A, 0x5A, 0x00, 0x00, 0x00, 0x00};
 #define BMS_DataSize 140
 uint8_t aBmsHead[4] = {0xAA, 0x55, 0xAA, 0xFF};
 
+typedef struct
+{
+  float fU = 0;
+  float fI = 0;
+  float fP = 0;
+  unsigned long iTimeLast = 0;
+  float fE = 0;
+  float fE_in = 0;
+  float fE_out = 0;
+
+} BatteryData;
+
+BatteryData oBattery;
+
+
 
 typedef struct
 {
@@ -101,6 +116,22 @@ typedef struct
 
 AntBmsData oData;
 
+
+void BatteryUpdate(BatteryData& oB, AntBmsData& oD)
+{
+  unsigned long iTime = millis();
+  if (  (oB.iTimeLast) && ((iTime-oB.iTimeLast) < 5000) )
+  {
+    uint16_t iMs =  iTime-oB.iTimeLast;
+    float fE = ((float)oD.iP * iMs) / 3600000;
+    oB.fE += fE;
+    if (fE > 0)
+      oB.fE_out += fE;
+    else
+      oB.fE_in -= fE;
+  }
+  oB.iTimeLast = iTime;
+}
 
 uint16_t Swap2(uint8_t* buffer, uint16_t i){  return ((uint16_t)buffer[i]<<8) + buffer[i+1];  }
 uint32_t Swap4(uint8_t* buffer, uint16_t i){  return ((uint32_t)buffer[i]<<24) + ((uint32_t)buffer[i+1]<<16) + ((uint32_t)buffer[i+2]<<8) + buffer[i+3];  }
@@ -175,7 +206,7 @@ boolean BmsDataRead(AntBmsData& oData, int iAvail)
     uint16_t checksum = (buffer[BMS_DataSize - 2] << 8) + buffer[BMS_DataSize - 1]; // big endian
     if (checksum != expected)
     {
-      DEB("checksum failure: ") DEB2(expected,HEX) DEB(" != ") DEB2(checksum,HEX)
+      DEB("checksum failure: ") DEB2(expected,HEX) DEB(" != ") DEB2(checksum,HEX) DEB("\n")
       break;
     }
     
