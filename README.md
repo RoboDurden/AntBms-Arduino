@@ -64,3 +64,16 @@ wSysLog: 7239	wSysLog.Status: 111
 wSysLog.BatteryNumber: 7	wSysLog.SequentialOrder: 7	wSysLog.ChargeDischarge: 1
 ```
    
+or
+
+```
+remain [%]: 90	iP [W]: 317	fCellMax [V]: 3.259	fCellMin [V]: 3.251
+fE_out [Wh]: 8.381	fE_in [Wh]: 0.000	fE [Wh]: 8.381
+remain [%]: 90	iP [W]: 317	fCellMax [V]: 3.259	fCellMin [V]: 3.251
+fE_out [Wh]: 8.425	fE_in [Wh]: 0.000	fE [Wh]: 8.425
+remain [%]: 90	iP [W]: 312	fCellMax [V]: 3.259	fCellMin [V]: 3.251
+fE_out [Wh]: 8.468	fE_in [Wh]: 0.000	fE [Wh]: 8.468
+remain [%]: 90	iP [W]: 317	fCellMax [V]: 3.259	fCellMin [V]: 3.251
+fE_out [Wh]: 8.512	fE_in [Wh]: 0.000	fE [Wh]: 8.512
+...
+```
