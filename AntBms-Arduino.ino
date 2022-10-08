@@ -9,6 +9,18 @@ void setup()
   Serial.begin(115200);
   DEB("Hello AntBms-Arduino :-)\n");
   Serial2.begin(19200, SERIAL_8N1, RXD2, TXD2);
+
+  EEPROM.begin(512);
+  EEPROM.get(0,oBattery);
+  DEBUGLN("EEPROM version:",oBattery.iVersion) 
+  if (oBattery.iVersion != EEPROM_VERSION)
+  {
+    BatteryData oNew;
+    oBattery = oNew;
+    SaveEeprom();
+  }
+  fET_Old = oBattery.fET;
+  
 }
 
 void loop()
@@ -23,8 +35,21 @@ void loop()
       //BmsDataLog(oData);
       BatteryUpdate(oBattery,oData);
       DEBUGT2("fE_out [Wh]",oBattery.fE_out,3) DEBUGT2("fE_in [Wh]",oBattery.fE_in,3) DEBUGLN2("fE [Wh]",oBattery.fE,3)
+      DEBUGT2("fET_out [kWh]",oBattery.fET_out,3) DEBUGT2("fET_in [kWh]",oBattery.fET_in,3) DEBUGLN2("fET [kWh]",oBattery.fET,3)
     }
   }
+
+  if (Serial.available())
+  {
+    char c = Serial.read();
+    switch (c)
+    {
+    case 115: // s
+      SaveEeprom();
+      break;
+    }
+  }
+
 
   if (iTimeRequest > iNow)
     return;
