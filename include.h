@@ -53,6 +53,9 @@ Supported devices
   #define DEBUGLN2(txt, val,format)
 #endif
 
+
+#include <EEPROM.h>
+
 #define RXD2 17   // wrongly soldered RX2 to 17 instead of 16 ?
 #define TXD2 16
 
@@ -65,20 +68,33 @@ uint8_t aBmsRequest[6] = {0x5A, 0x5A, 0x00, 0x00, 0x00, 0x00};
 #define BMS_DataSize 140
 uint8_t aBmsHead[4] = {0xAA, 0x55, 0xAA, 0xFF};
 
+#define EEPROM_VERSION 1
+
 typedef struct
 {
+  uint32_t iVersion = EEPROM_VERSION;
   float fU = 0;
   float fI = 0;
   float fP = 0;
   unsigned long iTimeLast = 0;
-  float fE = 0;
+  float fE = 0;   // Energy in Wh
   float fE_in = 0;
   float fE_out = 0;
+
+  float fET = 0;  // total Energy in kWh
+  float fET_in = 0;
+  float fET_out = 0;
 
 } BatteryData;
 
 BatteryData oBattery;
 
+void SaveEeprom()
+{
+  DEBUGLN("save eeprom, fET",oBattery.fET)
+  EEPROM.put(0,oBattery);
+  EEPROM.commit(); 
+}
 
 
 typedef struct
@@ -117,6 +133,8 @@ typedef struct
 AntBmsData oData;
 
 
+float fET_Old = 0;
+unsigned long iTimeEeprom = 0;
 void BatteryUpdate(BatteryData& oB, AntBmsData& oD)
 {
   unsigned long iTime = millis();
@@ -125,10 +143,23 @@ void BatteryUpdate(BatteryData& oB, AntBmsData& oD)
     uint16_t iMs =  iTime-oB.iTimeLast;
     float fE = ((float)oD.iP * iMs) / 3600000;
     oB.fE += fE;
+    oB.fET += fE/1000;
     if (fE > 0)
+    {
       oB.fE_out += fE;
+      oB.fET_out += fE/1000;
+    }
     else
+    {
       oB.fE_in -= fE;
+      oB.fET_in -= fE/1000;
+    }
+    if (  (abs(oB.fET-fET_Old) > 1.0)  && (iTime-iTimeEeprom > (6*3600000) ) )   // save to eeprom only once in 6 hours. SPI flash chip might only have 10,000 cycles
+    {
+      SaveEeprom();
+      fET_Old = oB.fET;
+      iTimeEeprom = iTime;
+    }
   }
   oB.iTimeLast = iTime;
 }
