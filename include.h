@@ -182,6 +182,7 @@ boolean BmsDataRead(AntBmsData& oData, int iAvail)
     BmsDataCopy(oData,buffer);
     return true;
   }
+  while (Serial2.available())  Serial2.read(); // empty buffer :-/
   return false;  
 }
 
