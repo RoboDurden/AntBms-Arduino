@@ -19,8 +19,10 @@ void loop()
   {
     if (BmsDataRead(oData, iAvail))
     {
-      //DEBUGLN("iP [W]",oData.iP)
-      BmsDataLog(oData);
+      DEBUGT("remain [%]",oData.iRemain) DEBUGT("iP [W]",oData.iP)   DEBUGT2("fCellMax [V]",oData.fCellMax,3) DEBUGLN2("fCellMin [V]",oData.fCellMin,3)
+      //BmsDataLog(oData);
+      BatteryUpdate(oBattery,oData);
+      DEBUGT2("fE_out [Wh]",oBattery.fE_out,3) DEBUGT2("fE_in [Wh]",oBattery.fE_in,3) DEBUGLN2("fE [Wh]",oBattery.fE,3)
     }
   }
 
