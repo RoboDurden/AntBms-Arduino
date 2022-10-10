@@ -44,6 +44,11 @@ void loop()
     char c = Serial.read();
     switch (c)
     {
+    case 105: // i
+      BmsDataLog(oData);
+      break;
+    case 99: // c
+      oBattery.fE = oBattery.fE_in = oBattery.fE_out = 0;
     case 115: // s
       SaveEeprom();
       break;
